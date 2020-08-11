@@ -9,7 +9,7 @@ import ctypes
 bme280_api = None
 bme280_api = ctypes.CDLL("bme280.so")
 
-#setup api
+# setup api
 bme280_api.init_device.argtypes = [ctypes.c_uint8, ctypes.c_uint8]
 bme280_api.init_device.restype = ctypes.c_int8
 bme280_api.set_oversampling.argtypes = [ctypes.c_uint8, ctypes.c_uint8, ctypes.c_uint8]
@@ -18,13 +18,15 @@ bme280_api.set_filter_coefficient.argtypes = [ctypes.c_uint8]
 bme280_api.set_filter_coefficient.restype = ctypes.c_int8
 bme280_api.set_sensor_settings.argtypes = [ctypes.c_uint8]
 bme280_api.set_sensor_settings.restype = ctypes.c_int8
-#bme280_api.update_data.argtype = None
+# bme280_api.close_connection.argtypes = [ctypes.c_uint8]
+bme280_api.close_connection.restype = ctypes.c_int8
+# bme280_api.update_data.argtype = None
 bme280_api.update_data.restype = ctypes.c_int8
-#bme280_api.get_pressure.argtype = None
+# bme280_api.get_pressure.argtype = None
 bme280_api.get_pressure.restype = ctypes.c_float
-#bme280_api.get_temperature.argtype = None
+# bme280_api.get_temperature.argtype = None
 bme280_api.get_temperature.restype = ctypes.c_float
-#bme280_api.get_humidity.argtype = None
+# bme280_api.get_humidity.argtype = None
 bme280_api.get_humidity.restype = ctypes.c_float
 
 
@@ -43,7 +45,7 @@ def handle_error_codes(error_code):
         raise Exception("SLEEP mode fail error")
     elif error_code == BME280.E_NVM_COPY_FAILED:
         raise Exception("NVM copy failed error")
-    else :
+    else:
         return
 
 
@@ -79,19 +81,54 @@ class BME280:
     STANDBY_SEL = 1 << 4
     ALL_SETTINGS_SEL = 0x1F
 
-
     def __init__(self, i2c_address=I2C_ADDR_PRIM, i2c_bus=1):
         error_code = bme280_api.init_device(ctypes.c_uint8(i2c_address), ctypes.c_uint8(i2c_bus))
         handle_error_codes(error_code)
 
     def set_oversampling(self, pressure_os, temperature_os, humidity_os):
-        error_code = bme280_api.set_oversampling(ctypes.c_uint8(pressure_os), ctypes.c_uint8(temperature_os), ctypes.c_uint8(humidity_os))
+        error_code = bme280_api.set_oversampling(ctypes.c_uint8(pressure_os), ctypes.c_uint8(temperature_os),
+                                                 ctypes.c_uint8(humidity_os))
         handle_error_codes(error_code)
 
     def set_filter_coefficient(self, filter_coefficient):
         error_code = bme280_api.set_filter_coefficient(ctypes.c_uint8(filter_coefficient))
         handle_error_codes(error_code)
 
-    def set_sensor_settings(self, pressure_sensor_active = True, temperature_sensor_active = True,
-                            humidity_sensor_active = True, iir_filter_active = True):
-        pass
+    def set_sensor_settings(self, pressure_sensor_active=True, temperature_sensor_active=True,
+                            humidity_sensor_active=True, iir_filter_active=True):
+        settings = 0
+        settings |= BME280.OSR_PRESS_SEL if pressure_sensor_active else 0
+        settings |= BME280.OSR_TEMP_SEL if temperature_sensor_active else 0
+        settings |= BME280.OSR_HUM_SEL if humidity_sensor_active else 0
+        settings |= BME280.FILTER_SEL if iir_filter_active else 0
+
+        error_code = bme280_api.set_sensor_settings(ctypes.c_uint8(settings))
+        handle_error_codes(error_code)
+
+    def set_weather_monitoring_configuration(self):
+        self.set_sensor_settings(True, True, True, False)
+        self.set_oversampling(BME280.OVERSAMPLING_1X, BME280.OVERSAMPLING_1X, BME280.OVERSAMPLING_1X)
+
+    def set_indoor_navigation_configuration(self):
+        self.set_sensor_settings(True, True, True, True)
+        self.set_oversampling(BME280.OVERSAMPLING_16X, BME280.OVERSAMPLING_2X, BME280.OVERSAMPLING_1X)
+        self.set_filter_coefficient(BME280.FILTER_COEFF_16)
+
+    def set_gaming_configuration(self):
+        self.set_sensor_settings(True, True, True, True)
+        self.set_oversampling(BME280.OVERSAMPLING_4X, BME280.OVERSAMPLING_1X, BME280.NO_OVERSAMPLING)
+        self.set_filter_coefficient(BME280.FILTER_COEFF_16)
+
+    def get_data(self):
+        error_code = bme280_api.update_data()
+        handle_error_codes(error_code)
+
+        data = {'T': bme280_api.get_temperature(), 'P': bme280_api.get_pressure(), 'H': bme280_api.get_humidity()}
+        return data
+
+    def close(self):
+        error_code = bme280_api.close_connection()
+        handle_error_codes(error_code)
+
+    def __del__(self):
+        self.close()

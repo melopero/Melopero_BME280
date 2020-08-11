@@ -254,3 +254,7 @@ float get_temperature() {
 float get_humidity() {
     return 0.01 * data.humidity;
 }
+
+int8_t close_connection() {
+    close(id.fd);
+}
