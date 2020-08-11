@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <errno.h>
 
 /******************************************************************************/
 /*!                         Own header files                                  */
