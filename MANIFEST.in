@@ -1,0 +1,2 @@
+include api/bme280.h
+include api/bme280_defs.h

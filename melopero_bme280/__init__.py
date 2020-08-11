@@ -3,3 +3,5 @@
 """
 @author: Leonardo La Rocca
 """
+
+from melopero_BME280.BME280 import BME280
