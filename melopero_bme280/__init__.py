@@ -4,4 +4,4 @@
 @author: Leonardo La Rocca
 """
 
-from melopero_BME280.BME280 import BME280
+from melopero_bme280.BME280 import BME280

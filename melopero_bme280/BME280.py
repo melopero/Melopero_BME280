@@ -5,9 +5,13 @@
 """
 
 import ctypes
+import glob
 
 bme280_api = None
-bme280_api = ctypes.CDLL("bme280.so")
+
+#TODO: replace withg pkg resources...
+api_filename = glob.glob("../bme280_api.*.so")[0]
+bme280_api = ctypes.CDLL(api_filename)
 
 # setup api
 bme280_api.init_device.argtypes = [ctypes.c_uint8, ctypes.c_uint8]
