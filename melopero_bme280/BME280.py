@@ -16,7 +16,7 @@ for file in os.listdir(lib_loc):
     if file.startswith('bme280_api') and file.endswith('.so'):
         lib_file = file
 
-bme280_api = ctypes.CDLL(lib_file)
+bme280_api = ctypes.CDLL(os.path.join(lib_loc, lib_file))
 
 # setup api
 bme280_api.init_device.argtypes = [ctypes.c_uint8, ctypes.c_uint8]
