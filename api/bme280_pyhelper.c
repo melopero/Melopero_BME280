@@ -156,7 +156,6 @@ int8_t init_device(uint8_t i2c_address, uint8_t i2c_bus) {
     snprintf(filename, 19, "/dev/i2c-%d", i2c_bus);
 
     id.dev_addr = i2c_address;
-    id.fd = i2c_fd;
 
     dev.intf = BME280_I2C_INTF;
     dev.read = user_i2c_read;
@@ -171,6 +170,8 @@ int8_t init_device(uint8_t i2c_address, uint8_t i2c_bus) {
         fprintf(stderr, "Error occurred while opening file %s! %s\n", filename, strerror(errno));
         return BME280_E_COMM_FAIL;
     }
+
+    id.fd = i2c_fd;
 
 //#ifdef __KERNEL__
     if (ioctl(id.fd, I2C_SLAVE, id.dev_addr) < 0)
