@@ -1,7 +1,7 @@
-#ifdef __KERNEL__
+//#ifdef __KERNEL__
 #include <linux/i2c-dev.h>
 #include <sys/ioctl.h>
-#endif
+//#endif
 
 /******************************************************************************/
 /*!                         System header files                               */
@@ -155,21 +155,6 @@ int8_t init_device(uint8_t i2c_address, uint8_t i2c_bus) {
     char filename[20];
     snprintf(filename, 19, "/dev/i2c-%d", i2c_bus);
 
-    int i2c_fd = open(filename, O_RDWR);
-    if (i2c_fd < 0) {
-        fprintf(stderr, "Error occurred while opening file %s! %s\n", filename, strerror(errno));
-        return BME280_E_COMM_FAIL;
-    }
-
-#ifdef __KERNEL__
-    if (ioctl(id.fd, I2C_SLAVE, id.dev_addr) < 0)
-    {
-        fprintf(stderr, "Failed to acquire bus access and/or talk to slave.\n");
-        return BME280_E_COMM_FAIL;
-    }
-
-#endif
-
     id.dev_addr = i2c_address;
     id.fd = i2c_fd;
 
@@ -180,6 +165,21 @@ int8_t init_device(uint8_t i2c_address, uint8_t i2c_bus) {
 
     /* Update interface pointer with the structure that contains both device address and file descriptor */
     dev.intf_ptr = &id;
+
+    int i2c_fd = open(filename, O_RDWR);
+    if (i2c_fd < 0) {
+        fprintf(stderr, "Error occurred while opening file %s! %s\n", filename, strerror(errno));
+        return BME280_E_COMM_FAIL;
+    }
+
+//#ifdef __KERNEL__
+    if (ioctl(id.fd, I2C_SLAVE, id.dev_addr) < 0)
+    {
+        fprintf(stderr, "Failed to acquire bus access and/or talk to slave.\n");
+        return BME280_E_COMM_FAIL;
+    }
+
+//#endif
 
     /* Initialize the bme280 */
     int8_t rslt = bme280_init(&dev);
