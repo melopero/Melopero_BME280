@@ -90,7 +90,7 @@ class BME280:
     STANDBY_SEL = 1 << 4
     ALL_SETTINGS_SEL = 0x1F
 
-    def __init__(self, i2c_address=I2C_ADDR_PRIM, i2c_bus=1):
+    def __init__(self, i2c_address=I2C_ADDR_SEC, i2c_bus=1):
         error_code = bme280_api.init_device(ctypes.c_uint8(i2c_address), ctypes.c_uint8(i2c_bus))
         handle_error_codes(error_code)
 
