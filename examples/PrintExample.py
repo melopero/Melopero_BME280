@@ -8,7 +8,6 @@ import melopero_bme280 as mp
 import time
 
 dev = mp.BME280()
-time.sleep
 dev.set_indoor_navigation_configuration()
 
 try:

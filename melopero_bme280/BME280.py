@@ -59,7 +59,7 @@ def handle_error_codes(error_code):
 
 
 class BME280:
-    NO_OVERSAMPLING = 0x00
+    SENSOR_OFF = 0x00
     OVERSAMPLING_1X = 0x01
     OVERSAMPLING_2X = 0x02
     OVERSAMPLING_4X = 0x03
@@ -98,36 +98,35 @@ class BME280:
         error_code = bme280_api.set_oversampling(ctypes.c_uint8(pressure_os), ctypes.c_uint8(temperature_os),
                                                  ctypes.c_uint8(humidity_os))
         handle_error_codes(error_code)
+        self._update_sensor_settings(True, True, True, False)
 
     def set_filter_coefficient(self, filter_coefficient):
         error_code = bme280_api.set_filter_coefficient(ctypes.c_uint8(filter_coefficient))
         handle_error_codes(error_code)
+        self._update_sensor_settings(False, False, False, True)
 
-    def set_sensor_settings(self, pressure_sensor_active=True, temperature_sensor_active=True,
-                            humidity_sensor_active=True, iir_filter_active=True):
+    def _update_sensor_settings(self, pressure_settings=True, temperature_settings=True,
+                            humidity_settings=True, iir_filter_settings=True):
         settings = 0
-        settings |= BME280.OSR_PRESS_SEL if pressure_sensor_active else 0
-        settings |= BME280.OSR_TEMP_SEL if temperature_sensor_active else 0
-        settings |= BME280.OSR_HUM_SEL if humidity_sensor_active else 0
-        settings |= BME280.FILTER_SEL if iir_filter_active else 0
+        settings |= BME280.OSR_PRESS_SEL if pressure_settings else 0
+        settings |= BME280.OSR_TEMP_SEL if temperature_settings else 0
+        settings |= BME280.OSR_HUM_SEL if humidity_settings else 0
+        settings |= BME280.FILTER_SEL if iir_filter_settings else 0
 
-        print(settings)
         error_code = bme280_api.set_sensor_settings(ctypes.c_uint8(settings))
         handle_error_codes(error_code)
 
     def set_weather_monitoring_configuration(self):
         self.set_oversampling(BME280.OVERSAMPLING_1X, BME280.OVERSAMPLING_1X, BME280.OVERSAMPLING_1X)
-        self.set_sensor_settings(True, True, True, False)
+        self.set_filter_coefficient(BME280.FILTER_COEFF_OFF)
 
     def set_indoor_navigation_configuration(self):
         self.set_oversampling(BME280.OVERSAMPLING_16X, BME280.OVERSAMPLING_2X, BME280.OVERSAMPLING_1X)
         self.set_filter_coefficient(BME280.FILTER_COEFF_16)
-        self.set_sensor_settings()
 
     def set_gaming_configuration(self):
-        self.set_oversampling(BME280.OVERSAMPLING_4X, BME280.OVERSAMPLING_1X, BME280.NO_OVERSAMPLING)
+        self.set_oversampling(BME280.OVERSAMPLING_4X, BME280.OVERSAMPLING_1X, BME280.SENSOR_OFF)
         self.set_filter_coefficient(BME280.FILTER_COEFF_16)
-        self.set_sensor_settings()
 
     def get_data(self):
         error_code = bme280_api.update_data()
