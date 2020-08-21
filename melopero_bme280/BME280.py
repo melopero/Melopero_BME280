@@ -116,18 +116,18 @@ class BME280:
         handle_error_codes(error_code)
 
     def set_weather_monitoring_configuration(self):
-        self.set_sensor_settings(True, True, True, False)
         self.set_oversampling(BME280.OVERSAMPLING_1X, BME280.OVERSAMPLING_1X, BME280.OVERSAMPLING_1X)
+        self.set_sensor_settings(True, True, True, False)
 
     def set_indoor_navigation_configuration(self):
-        self.set_sensor_settings(True, True, True, True)
         self.set_oversampling(BME280.OVERSAMPLING_16X, BME280.OVERSAMPLING_2X, BME280.OVERSAMPLING_1X)
         self.set_filter_coefficient(BME280.FILTER_COEFF_16)
+        self.set_sensor_settings()
 
     def set_gaming_configuration(self):
-        self.set_sensor_settings(True, True, True, True)
         self.set_oversampling(BME280.OVERSAMPLING_4X, BME280.OVERSAMPLING_1X, BME280.NO_OVERSAMPLING)
         self.set_filter_coefficient(BME280.FILTER_COEFF_16)
+        self.set_sensor_settings()
 
     def get_data(self):
         error_code = bme280_api.update_data()
