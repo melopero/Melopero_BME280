@@ -111,6 +111,7 @@ class BME280:
         settings |= BME280.OSR_HUM_SEL if humidity_sensor_active else 0
         settings |= BME280.FILTER_SEL if iir_filter_active else 0
 
+        print(settings)
         error_code = bme280_api.set_sensor_settings(ctypes.c_uint8(settings))
         handle_error_codes(error_code)
 
